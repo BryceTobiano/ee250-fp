@@ -16,6 +16,7 @@ from model import KeyPointClassifier
 from model import PointHistoryClassifier
 
 from google.protobuf.json_format import MessageToDict
+from json import dumps
 import paho.mqtt.client as mqtt
 import time
 
@@ -117,11 +118,6 @@ def main():
         client.connect(host="eclipse.usc.edu", port=1883, keepalive=60)
         client.loop_start()
 
-    # State variables #################################################################
-    currLeftGesture = NULL
-    currRightGesture = NULL
-    currDirection = NULL
-
     while True:
         fps = cvFpsCalc.get()
 
@@ -194,13 +190,21 @@ def main():
                 )
                 for i, hand_handedness in enumerate(results.multi_handedness):
                     handedness_dict = MessageToDict(hand_handedness)
+                    liveHandedness = handedness_dict["classification"][0]["label"]
                     # print(handedness_dict)
-                    print("Handedness : " + handedness_dict["classification"][0]["label"])
+                    # print("Handedness : " + liveHandedness)
                 
-                print("Classification : " + keypoint_classifier_labels[hand_sign_id])
-                print("Direction : " + point_history_classifier_labels[most_common_fg_id[0][0]])
+                liveGesture = keypoint_classifier_labels[hand_sign_id]
+                liveDirection = point_history_classifier_labels[most_common_fg_id[0][0]]
+                # print("Classification : " + liveGesture)
+                # print("Direction : " + liveDirection)
 
-                client.publish("uhnoo/hands", keypoint_classifier_labels[hand_sign_id])
+                # if (liveHandedness == "Left") and (currLeftGesture != liveGesture):
+                #     currLeftGesture = liveHandedness
+                #     client.publish("uhnoo/left_hand", currLeftGesture)
+
+                client.publish("uhnoo/lumos", dumps({"hand": liveHandedness, "gesture": liveGesture, "direction": liveDirection}))
+
         else:
             point_history.append([0, 0])
 
