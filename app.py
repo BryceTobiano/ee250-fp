@@ -15,6 +15,9 @@ from utils import CvFpsCalc
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
 
+from google.protobuf.json_format import MessageToDict
+import paho.mqtt.client as mqtt
+import time
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -61,7 +64,7 @@ def main():
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(
         static_image_mode=use_static_image_mode,
-        max_num_hands=1,
+        max_num_hands=2,
         min_detection_confidence=min_detection_confidence,
         min_tracking_confidence=min_tracking_confidence,
     )
@@ -97,6 +100,27 @@ def main():
 
     #  ########################################################################
     mode = 0
+
+    # MQTT #################################################################
+    def on_connect(client, userdata, flags, rc):
+        print("Connected to server (i.e., broker) with result code "+str(rc))
+
+    #Default message callback. Please use custom callbacks.
+    def on_message(client, userdata, msg):
+        print("on_message: " + msg.topic + " " + str(msg.payload, "utf-8"))
+
+    if __name__ == '__main__':
+        #this section is covered in publisher_and_subscriber_example.py
+        client = mqtt.Client()
+        client.on_message = on_message
+        client.on_connect = on_connect
+        client.connect(host="eclipse.usc.edu", port=1883, keepalive=60)
+        client.loop_start()
+
+    # State variables #################################################################
+    currLeftGesture = NULL
+    currRightGesture = NULL
+    currDirection = NULL
 
     while True:
         fps = cvFpsCalc.get()
@@ -168,6 +192,15 @@ def main():
                     keypoint_classifier_labels[hand_sign_id],
                     point_history_classifier_labels[most_common_fg_id[0][0]],
                 )
+                for i, hand_handedness in enumerate(results.multi_handedness):
+                    handedness_dict = MessageToDict(hand_handedness)
+                    # print(handedness_dict)
+                    print("Handedness : " + handedness_dict["classification"][0]["label"])
+                
+                print("Classification : " + keypoint_classifier_labels[hand_sign_id])
+                print("Direction : " + point_history_classifier_labels[most_common_fg_id[0][0]])
+
+                client.publish("uhnoo/hands", keypoint_classifier_labels[hand_sign_id])
         else:
             point_history.append([0, 0])
 
