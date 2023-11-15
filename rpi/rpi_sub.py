@@ -6,8 +6,8 @@ from grovepi import *
 led = 3
 
 pinMode(led,"OUTPUT")
-i=0
-analogWrite(led,i)
+global i
+analogWrite(led,0)
 
 time.sleep(1)
 
@@ -42,6 +42,7 @@ def on_message(client, userdata, msg):
     print("on_message: " + msg.topic + " " + str(msg.payload, "utf-8"))
 
 if __name__ == '__main__':
+    i = 0
     #this section is covered in publisher_and_subscriber_example.py
     client = mqtt.Client()
     client.on_message = on_message
