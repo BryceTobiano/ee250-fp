@@ -3,20 +3,27 @@ import time
 from json import loads
 from grovepi import *
 
-led = 4
+led = 3
 
 pinMode(led,"OUTPUT")
+i=0
+analogWrite(led,i)
+
 time.sleep(1)
 
 def lumos_callback(client, userdata, message):
     payload = str(message.payload, "utf-8")
     if payload == "yas":
         try:
-            print("LED is ON")
-            digitalWrite(led, 1)
-            time.sleep(1)
-            digitalWrite(led, 0)
-            time.sleep(1)
+            print("LED brightness increase")
+            i += 20
+            if i > 255:
+                i = 0
+            analogWrite(led,i)
+            # digitalWrite(led, 1)
+            # time.sleep(1)
+            # digitalWrite(led, 0)
+            # time.sleep(1)
         except KeyboardInterrupt:	# Turn LED off before stopping
             digitalWrite(led, 0)
             print("interrupt")
