@@ -102,21 +102,7 @@ def main():
     #  ########################################################################
     mode = 0
 
-    # MQTT #################################################################
-    def on_connect(client, userdata, flags, rc):
-        print("Connected to server (i.e., broker) with result code "+str(rc))
-
-    #Default message callback. Please use custom callbacks.
-    def on_message(client, userdata, msg):
-        print("on_message: " + msg.topic + " " + str(msg.payload, "utf-8"))
-
-    if __name__ == '__main__':
-        #this section is covered in publisher_and_subscriber_example.py
-        client = mqtt.Client()
-        client.on_message = on_message
-        client.on_connect = on_connect
-        client.connect(host="eclipse.usc.edu", port=1883, keepalive=60)
-        client.loop_start()
+    state = ["0", "0"]
 
     while True:
         fps = cvFpsCalc.get()
@@ -143,8 +129,9 @@ def main():
 
         #  ####################################################################
         if results.multi_hand_landmarks is not None:
+            state = ["0", "0"]
             for hand_landmarks, handedness in zip(results.multi_hand_landmarks,
-                                                  results.multi_handedness):
+                                                results.multi_handedness):
                 # Bounding box calculation
                 brect = calc_bounding_rect(debug_image, hand_landmarks)
                 # Landmark calculation
@@ -188,23 +175,20 @@ def main():
                     keypoint_classifier_labels[hand_sign_id],
                     point_history_classifier_labels[most_common_fg_id[0][0]],
                 )
-                for i, hand_handedness in enumerate(results.multi_handedness):
-                    handedness_dict = MessageToDict(hand_handedness)
-                    liveHandedness = handedness_dict["classification"][0]["label"]
-                    # print(handedness_dict)
-                    # print("Handedness : " + liveHandedness)
-                
-                liveGesture = keypoint_classifier_labels[hand_sign_id]
-                liveDirection = point_history_classifier_labels[most_common_fg_id[0][0]]
-                # print("Classification : " + liveGesture)
-                # print("Direction : " + liveDirection)
 
-                # if (liveHandedness == "Left") and (currLeftGesture != liveGesture):
-                #     currLeftGesture = liveHandedness
-                #     client.publish("uhnoo/left_hand", currLeftGesture)
+                handedness_dict = MessageToDict(handedness)
+                liveHandedness = handedness_dict["classification"][0]["label"] # Which hand
+                liveGesture = keypoint_classifier_labels[hand_sign_id] # Gesture
+                liveAction = point_history_classifier_labels[most_common_fg_id[0][0]] # Action
 
-                client.publish("uhnoo/lumos", dumps({"hand": liveHandedness, "gesture": liveGesture, "direction": liveDirection}))
+                if len(results.multi_handedness) == 2:
+                    if liveHandedness == "Left" and liveGesture == "Open":
+                        state[0] = "1"
+                    if liveHandedness == "Right" and liveAction == "Move":
+                        state[1] = "1"
 
+            if "".join(state) == "11":
+                client.publish("uhnoo/lumos", "yas")
         else:
             point_history.append([0, 0])
 
@@ -575,6 +559,19 @@ def draw_info(image, fps, mode, number):
                        cv.LINE_AA)
     return image
 
+# MQTT #################################################################
+def on_connect(client, userdata, flags, rc):
+    print("Connected to server (i.e., broker) with result code "+str(rc))
+
+#Default message callback. Please use custom callbacks.
+def on_message(client, userdata, msg):
+    print("on_message: " + msg.topic + " " + str(msg.payload, "utf-8"))
 
 if __name__ == '__main__':
+    client = mqtt.Client()
+    client.on_message = on_message
+    client.on_connect = on_connect
+    client.connect(host="eclipse.usc.edu", port=1883, keepalive=60)
+    client.loop_start()
+
     main()
