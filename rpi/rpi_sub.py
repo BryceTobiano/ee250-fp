@@ -16,7 +16,7 @@ def lumos_callback(client, userdata, message):
     if payload == "yas":
         try:
             print("LED brightness increase")
-            i += 20
+            i = i + 20
             if i > 255:
                 i = 0
             analogWrite(led,i)
