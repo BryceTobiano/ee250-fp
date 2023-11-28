@@ -182,7 +182,12 @@ def main():
                 liveAction = point_history_classifier_labels[most_common_fg_id[0][0]] # Action
 
                 if liveAction == "Move":
-                    client.publish("uhnoo/lumos", str(landmark_list[8]))
+                    indexTip = landmark_list[8]
+                    if indexTip[0] < 0:
+                        indexTip[0] = 0
+                    if indexTip[1] < 0:
+                        indexTip[1] = 0
+                    client.publish("uhnoo/lumos", str(indexTip))
 
                 # OLD PROJECT IDEA CODE:
                 # if len(results.multi_handedness) == 2:
@@ -191,7 +196,7 @@ def main():
                 #     if liveHandedness == "Right" and liveAction == "Move":
                 #         state[1] = "1"
 
-            # OLD PROJECT IDEA CODE: 
+            # OLD PROJECT IDEA CODE:
             # if "".join(state) == "11":
             #     client.publish("uhnoo/lumos", "yas")
         else:

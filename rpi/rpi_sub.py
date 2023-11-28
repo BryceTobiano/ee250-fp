@@ -3,27 +3,49 @@ import time
 from json import loads
 from grovepi import *
 
-led = 5
-pinMode(led,"OUTPUT")
-analogWrite(led,0)
+ledList = [3, 5, 6, 9]
+for led in ledList:
+    pinMode(led, "OUTPUT")
 
 time.sleep(1)
 
 def lumos_callback(client, userdata, message):
     payload = str(message.payload, "utf-8")
-    print(payload)
-    print(type(payload))
-    # if payload == "yas":
-    #     try:
-    #         digitalWrite(led, 1)
-    #         time.sleep(1)
-    #         digitalWrite(led, 0)
-    #         time.sleep(1)
-    #     except KeyboardInterrupt:	# Turn LED off before stopping
-    #         digitalWrite(led, 0)
-    #         print("interrupt")
-    #     except IOError:				# Print "Error" if communication error encountered
-    #         print("Error")
+    data = list(map(int, payload[1:len(payload)-1].split(", ")))
+    print(data)
+    try:
+        x = data[0]
+        y = data[1]
+        windowWidth = 1280
+        windowHeight = 720
+        breakpoints = [0, windowWidth/4, windowWidth / 2, 3*windowWidth/4, windowWidth]
+
+        # calculate which LED should be turned on
+        whichLED = 0
+        if x < breakpoints[1]:
+            whichLED = 0       # 3
+        elif x < breakpoints[2]:
+            whichLED = 1       # 5
+        elif x < breakpoints[3]:
+            whichLED = 2       # 6
+        elif x < breakpoints[4]:
+            whichLED = 3       # 9
+        else:
+            print("uh oh")      # we got a problem
+        yBrightness = y / windowHeight * 256
+        if yBrightness < 0:
+            yBrightness = 0
+        print(yBrightness)
+        analogWrite(whichLED, yBrightness)
+        time.sleep(1)
+    except KeyboardInterrupt:
+        for led in ledList: # turn off all LEDs before stopping
+            analogWrite(led, 0)
+        print("interrupt")
+    except IOError:
+        for led in ledList: # turn off all LEDs before stopping
+            analogWrite(led, 0)
+        print("error")
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to server (i.e., broker) with result code "+str(rc))
