@@ -12,6 +12,6 @@ if __name__ == '__main__':
         if i > 255:
             i = 0
         analogWrite(led,i)
-        print("Current Brightness: " + i)
+        print(i)
         time.sleep(100)
          
