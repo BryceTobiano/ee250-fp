@@ -39,7 +39,8 @@ def lumos_callback(client, userdata, message):
             yBrightness = 0
         print(yBrightness)
         for led in ledList:
-            analogWrite(led, 0)
+            if(led != whichLED):
+                analogWrite(led, 0)
         analogWrite(ledList[whichLED], int(yBrightness))
         time.sleep(0.1)
     except KeyboardInterrupt:
