@@ -3,7 +3,7 @@ import time
 from json import loads
 from grovepi import *
 
-ledList = [3, 5, 6, 9]
+ledList = [5, 6]
 for led in ledList:
     pinMode(led,"OUTPUT")
     analogWrite(led, 0)
@@ -20,18 +20,14 @@ def lumos_callback(client, userdata, message):
         y = data[1]
         windowWidth = 1280
         windowHeight = 720
-        breakpoints = [0, windowWidth/4, windowWidth / 2, 3*windowWidth/4, windowWidth]
+        breakpoints = [0, windowWidth / 2, windowWidth]
 
         # calculate which LED should be turned on
         whichLED = 0
         if x < breakpoints[1]:
-            whichLED = 0       # 3
+            whichLED = 0       # 5
         elif x < breakpoints[2]:
-            whichLED = 1       # 5
-        elif x < breakpoints[3]:
-            whichLED = 2       # 6
-        elif x < breakpoints[4]:
-            whichLED = 3       # 9
+            whichLED = 1       # 6
         else:
             print("uh oh")      # we got a problem
         yBrightness = (y / windowHeight) * 256
