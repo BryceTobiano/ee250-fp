@@ -181,14 +181,19 @@ def main():
                 liveGesture = keypoint_classifier_labels[hand_sign_id] # Gesture
                 liveAction = point_history_classifier_labels[most_common_fg_id[0][0]] # Action
 
-                if len(results.multi_handedness) == 2:
-                    if liveHandedness == "Left" and liveGesture == "Open":
-                        state[0] = "1"
-                    if liveHandedness == "Right" and liveAction == "Move":
-                        state[1] = "1"
+                if liveAction == "Move":
+                    client.publish("uhnoo/lumos", str(landmark_list[8]))
 
-            if "".join(state) == "11":
-                client.publish("uhnoo/lumos", "yas")
+                # OLD PROJECT IDEA CODE:
+                # if len(results.multi_handedness) == 2:
+                #     if liveHandedness == "Left" and liveGesture == "Open":
+                #         state[0] = "1"
+                #     if liveHandedness == "Right" and liveAction == "Move":
+                #         state[1] = "1"
+
+            # OLD PROJECT IDEA CODE: 
+            # if "".join(state) == "11":
+            #     client.publish("uhnoo/lumos", "yas")
         else:
             point_history.append([0, 0])
 
