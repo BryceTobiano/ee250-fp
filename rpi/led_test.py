@@ -13,5 +13,5 @@ if __name__ == '__main__':
             i = 0
         analogWrite(led,i)
         print(i)
-        time.sleep(100)
+        time.sleep(1)
          
