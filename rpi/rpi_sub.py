@@ -11,17 +11,19 @@ time.sleep(1)
 
 def lumos_callback(client, userdata, message):
     payload = str(message.payload, "utf-8")
-    if payload == "yas":
-        try:
-            digitalWrite(led, 1)
-            time.sleep(1)
-            digitalWrite(led, 0)
-            time.sleep(1)
-        except KeyboardInterrupt:	# Turn LED off before stopping
-            digitalWrite(led, 0)
-            print("interrupt")
-        except IOError:				# Print "Error" if communication error encountered
-            print("Error")
+    print(payload)
+    print(type(payload))
+    # if payload == "yas":
+    #     try:
+    #         digitalWrite(led, 1)
+    #         time.sleep(1)
+    #         digitalWrite(led, 0)
+    #         time.sleep(1)
+    #     except KeyboardInterrupt:	# Turn LED off before stopping
+    #         digitalWrite(led, 0)
+    #         print("interrupt")
+    #     except IOError:				# Print "Error" if communication error encountered
+    #         print("Error")
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to server (i.e., broker) with result code "+str(rc))
