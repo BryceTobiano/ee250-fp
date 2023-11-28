@@ -6,6 +6,7 @@ from grovepi import *
 ledList = [3, 5, 6, 9]
 for led in ledList:
     pinMode(led, "OUTPUT")
+analogWrite(5,0)
 
 time.sleep(1)
 
@@ -32,12 +33,13 @@ def lumos_callback(client, userdata, message):
             whichLED = 3       # 9
         else:
             print("uh oh")      # we got a problem
-        yBrightness = y / windowHeight * 256
+        yBrightness = (y / windowHeight) * 256
         if yBrightness < 0:
             yBrightness = 0
         print(yBrightness)
-        analogWrite(ledList[whichLED], yBrightness)
-        time.sleep(1)
+        analogWrite(5, yBrightness)
+        # analogWrite(ledList[whichLED], yBrightness)
+        time.sleep(0.1)
     except KeyboardInterrupt:
         for led in ledList: # turn off all LEDs before stopping
             analogWrite(led, 0)
