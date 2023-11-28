@@ -1,13 +1,11 @@
 import paho.mqtt.client as mqtt
 import time
 from json import loads
-from grovepi import *
+# from grovepi import *
 
 led = 3
 
 pinMode(led,"OUTPUT")
-global i
-analogWrite(led,0)
 
 time.sleep(1)
 
@@ -15,15 +13,10 @@ def lumos_callback(client, userdata, message):
     payload = str(message.payload, "utf-8")
     if payload == "yas":
         try:
-            print("LED brightness increase")
-            i = i + 20
-            if i > 255:
-                i = 0
-            analogWrite(led,i)
-            # digitalWrite(led, 1)
-            # time.sleep(1)
-            # digitalWrite(led, 0)
-            # time.sleep(1)
+            digitalWrite(led, 1)
+            time.sleep(1)
+            digitalWrite(led, 0)
+            time.sleep(1)
         except KeyboardInterrupt:	# Turn LED off before stopping
             digitalWrite(led, 0)
             print("interrupt")
@@ -42,13 +35,12 @@ def on_message(client, userdata, msg):
     print("on_message: " + msg.topic + " " + str(msg.payload, "utf-8"))
 
 if __name__ == '__main__':
-    i = 0
     #this section is covered in publisher_and_subscriber_example.py
     client = mqtt.Client()
     client.on_message = on_message
     client.on_connect = on_connect
-    client.connect(host="eclipse.usc.edu", port=1883, keepalive=60)
+    client.connect(host="broker.hivemq.com", port=1883, keepalive=60)
     client.loop_start()
 
     while True:
-        time.sleep(1)  
+        time.sleep(1)
